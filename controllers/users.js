@@ -126,6 +126,139 @@ exports.logoutAll = async (req, res, next) => {
     return;
   }
 };
+// @desc 패스워드 변경
+// @route POST /api/v1/users/change
+// @parameters email, passwd, new_passwd
+exports.changePasswd = async (req, res, next) => {
+  let email = req.body.email;
+  let passwd = req.body.passwd;
+  let new_passwd = req.body.new_passwd;
+
+  let query = "select passwd from movie_review_user where email = ?";
+  let data = [email];
+
+  try {
+    [rows] = await connection.query(query, data);
+    let savedPasswd = rows[0].passwd;
+
+    let isMatch = bcrypt.compareSync(passwd, savedPasswd);
+
+    if (isMatch != true) {
+      res.status(401).json({ success: false, result: isMatch });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+  query = "update movie_review_user set passwd = ? where email = ?";
+  const hashedPasswd = await bcrypt.hash(new_passwd, 8);
+  data = [hashedPasswd, email];
+
+  try {
+    [result] = await connection.query(query, data);
+    if (result.affectedRows == 1) {
+      res.status(200).json({ success: true });
+      return;
+    } else {
+      res.status(200).json({ success: false });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+// 유저가 패스워드를 분실
+// 1. 클라이언트가 패스워드 분실했다고 서버한테 요청
+//    서버가 패스워들 변경할 수 있는 url을 클라이언트한테 보내준다
+//    (경로에 암호화된 문자열을 보내준다 -> 토큰역할)
+
+// @desc   패스워드 분실
+// @route  POST  /api/v1/users/forgotpasswd
+// 따로 파라미터 안보내도되고 모스통해서 온다
+exports.forgotPasswd = async (req, res, next) => {
+  let user = req.user;
+  // 암호화된 문자열 만드는 방법
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  const resetPasswdToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  // 해당 리셋 패스워드 토큰 데이터베이스에 저장
+  // 유저 테이블에 reset_passwd_token 컬럼에 저장
+  // 문자열 바꿀 경로 , 쿼리에 들어갈 데이터 설정도해준다
+  let query =
+    "update movie_review_user set reset_passwd_token = ? where id = ?";
+  let data = [resetPasswdToken, user.id];
+
+  try {
+    [result] = await connection.query(query, data);
+    user.reset_passwd_token = resetPasswdToken;
+    res.status(200).json({ success: true, data: user });
+    return;
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+// 2. 클라이언트는 해당 암호화된 주소를 받아서 새로운 비밀번호를 함께 서버로 보낸다
+//    서버는 이 주소가 진짜 유효한지 확인해서 새로운 비밀번호로 셋팅
+
+// @desc 리셋 패스워드 토큰을 경로로 만들어서 바꿀 비번과 함께 요청
+//       비번 초기화 ( reset passwd api)
+// @route POST  /api/v1/users/resetPasswd/:resetPasswdToken(:resetPasswdToken =>/req.params.resetPasswdToken 이 내용임)
+// @req   passwd
+exports.resetPasswd = async (req, res, next) => {
+  const resetPasswdToken = req.params.resetPasswdToken;
+  const user_id = req.user.id;
+
+  let query = "select * from movie_review_user where id = ?";
+  let data = [user_id];
+
+  try {
+    [rows] = await connection.query(query, data);
+    savedResetPasswdToken = rows[0].reset_passwd_token;
+    if (savedResetPasswdToken !== resetPasswdToken) {
+      res.status(400).json({ success: false });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+
+  let passwd = req.body.passwd;
+  // 유저한테 넘어온 패스워드를 암호화 시킨다
+  const hashedPasswd = await bcrypt.hash(passwd, 8);
+  // 기존에 있던 패스워드를 새로운 패스워드로 업데이트 시킨다
+  // reset_passwd_token 패스워드 다 바꾸고 비어있는 패스워드로 다시 바꿔라 '' 공백으로 표시해준다
+  query =
+    "update movie_review_user set passwd = ?, reset_passwd_token = '' where id = ?";
+  data = [hashedPasswd, user_id];
+  // 유저의 reset_passwd_token 지워라
+  delete req.user.reset_passwd_token;
+  try {
+    [result] = await connection.query(query, data);
+    res.status(200).json({ success: true, data: req.user });
+    return;
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+// 유저의 id 값으로 내 정보 가져오기
+// @desc 내 정보 가져오기
+// @route GET /api/v1/users
+exports.getMyInfo = async (req, res, next) => {
+  console.log("내 정보 가져오는 API", req.user);
+
+  res.status(200).json({ success: true, result: req.user });
+  return;
+};
 
 // @desc 회원탈퇴 : 유저 테이블에서 삭제, 토큰 데이블에서 삭제
 // @route DELETE  /api/v1/users

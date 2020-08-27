@@ -10,7 +10,6 @@ const auth = async (req, res, next) => {
     res.status(401).json();
     return;
   }
-  console.log(token);
 
   let user_id;
   try {
@@ -28,6 +27,7 @@ const auth = async (req, res, next) => {
     where t.user_id = ? and t.token = ?;";
 
   let data = [user_id, token];
+
   try {
     [rows] = await connection.query(query, data);
     if (rows.length == 0) {

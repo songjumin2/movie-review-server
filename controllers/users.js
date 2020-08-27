@@ -1,10 +1,9 @@
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const path = require("path");
+const crypto = require("crypto");
 
 const connection = require("../db/mysql_connection");
-const { toUnicode } = require("punycode");
 
 // @desc   회원가입
 // @route  POST /api/v1/users   // post는 body로 받는다
@@ -13,8 +12,16 @@ exports.createUser = async (req, res, next) => {
   let email = req.body.email;
   let passwd = req.body.passwd;
 
+  if (!email || !passwd) {
+    res
+      .status(400)
+      .json({ success: false, message: "이메일, 비밀번호 둘 다 입력해주세요" });
+    return;
+  }
   if (!validator.isEmail(email)) {
-    res.status(400).json({ success: false });
+    res
+      .status(400)
+      .json({ success: false, message: "이메일 형식으로 입력해주세요" });
     return;
   }
 
@@ -31,6 +38,11 @@ exports.createUser = async (req, res, next) => {
     [result] = await conn.query(query, data);
     user_id = result.insertId;
   } catch (e) {
+    if (e.errno == 1062) {
+      // 이메일 중복된 것이다
+      res.status(400).json({ success: false, message: "이메일 중복" });
+      return;
+    }
     await conn.rollback();
     res.status(500).json();
     return;

@@ -20,6 +20,6 @@ router.route("/logout").delete(auth, logoutUser);
 router.route("/logoutAll").delete(auth, logoutAll);
 router.route("/change").post(auth, changePasswd);
 router.route("/forgotPasswd").post(auth, forgotPasswd);
-router.route("/resetPasswd").post(auth, resetPasswd);
+router.route("/resetPasswd/:resetPasswdToken").post(auth, resetPasswd);
 
 module.exports = router;

@@ -34,21 +34,18 @@ exports.addFavorite = async (req, res, next) => {
 exports.getMyFavorites = async (req, res, next) => {
   let offset = Number(req.query.offset);
   let limit = Number(req.query.limit);
-  let order = req.query.order;
+
   let user_id = req.user.id;
 
-  if (!order) {
-    order = "dasc";
-  }
+  let query =
+    "select m.id, m.title, m.release_date, f.id as favorite_id \
+      from movies_favorite as f \
+      join mytable as m \
+      on f.movie_id = m.id \
+      where f.user_id = ? \
+      limit ?,?";
 
-  let query = `select m.id, m.title, m.release_date, f.id as favorite_id 
-      from movies_favorite as f 
-      join mytable as m 
-      on f.movie_id = m.id 
-      where f.user_id ${user_id} order by f.id ${order}
-      limit ${offset}, ${limit}`;
-
-  let data = [user_id, order, offset, limit];
+  let data = [user_id, offset, limit];
 
   try {
     [rows] = await connection.query(query, data);

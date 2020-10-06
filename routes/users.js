@@ -10,7 +10,6 @@ const {
   getMyInfo,
   forgotPasswd,
   resetPasswd,
-  getMyReview,
 } = require("../controllers/users");
 
 const router = express.Router();

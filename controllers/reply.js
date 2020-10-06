@@ -22,9 +22,36 @@ exports.addReply = async (req, res, next) => {
     res.status(500).json();
   }
 };
+// 내가 쓴 리뷰 가져오기
+// @desc 나의 리뷰 가져오기
+// @route GET /api/v1/reply/review?offset=0&limit=25
+// @parameters  offset, limit
+// @response success, cnt, items : [{title, content, rating}]
+exports.getMyReview = async (req, res, next) => {
+  let offset = Number(req.query.offset);
+  let limit = Number(req.query.limit);
+  let user_id = req.user.id;
+
+  let query =
+    "select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating\
+  from movies_reply as mr\
+  join mytable as m\
+  on mr.movie_id = m.id\
+  where mr.user_id = ?\
+  limit ?,?";
+
+  let data = [user_id, offset, limit];
+  try {
+    [rows] = await connection.query(query, data);
+    let cnt = rows.length;
+    res.status(200).json({ success: true, items: rows, cnt: cnt });
+  } catch (e) {
+    res.status(400).json({ error: e });
+  }
+};
 
 // @desc     해당 영화의 댓글을 가져오는 API
-// @route    GET  /api/v1/reply?movie_id=124&offset=0&limit=25
+// @route    GET  /api/v1/reply?movie_id=124&offset=0&limit=25&order=desc
 // @request  movie_id, offset, limit
 // @response  sucess, items:[], cnt
 // 물음표 뒤에있는건 쿼리에서 찾아야함
@@ -32,22 +59,26 @@ exports.getReply = async (req, res, next) => {
   let movie_id = req.query.movie_id;
   let offset = req.query.offset;
   let limit = req.query.limit;
+  let order = req.query.order;
 
-  let query =
-    "select r.id as reply_id, m.title, u.id as user_id, u.email, r.content, \
-  r.rating, r.created_at \
-  from movies_reply as r \
-  join mytable as m on r.movie_id = m.id \
-  join movie_review_user as u  on r.user_id = u.id \
-  where r.movie_id = ?  limit  ? , ?  ;";
+  if (!order) {
+    order = "dasc";
+  }
+
+  let query = `select r.id as reply_id, m.title, u.id as user_id, u.email, r.content,
+  r.rating, r.created_at 
+  from movies_reply as r 
+  join mytable as m on r.movie_id = m.id 
+  join movie_review_user as u  on r.user_id = u.id 
+  where r.movie_id = ${movie_id} order by r.created_at ${order} limit ${offset}, ${limit} `;
   // offset, limit 는 넘버 붙여줘야함
-  let data = [movie_id, Number(offset), Number(limit)];
+  let data = [movie_id, order, Number(offset), Number(limit)];
   try {
     [rows] = await connection.query(query, data);
     res.status(200).json({ success: true, items: rows, cnt: rows.length });
     return;
   } catch (e) {
-    res.status(500).json();
+    res.status(500).json({ success: false, error: e });
     return;
   }
 };

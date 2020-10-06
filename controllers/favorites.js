@@ -30,21 +30,25 @@ exports.addFavorite = async (req, res, next) => {
 // @desc    즐겨찾기에 저장 된 영화 가져오는 API
 // @route   GET  /api/v1/favorites?offset=0&limit=25
 // @parameters  offset, limit
-// @response success, cnt, itens : [{title, genre, attendance, year}]
+// @response success, cnt, items : [{title, genre, attendance, year}]
 exports.getMyFavorites = async (req, res, next) => {
   let offset = Number(req.query.offset);
   let limit = Number(req.query.limit);
+  let order = req.query.order;
   let user_id = req.user.id;
 
-  let query =
-    "select m.id, m.title, m.release_date, f.id as favorite_id \
-      from movies_favorite as f \
-      join mytable as m \
-      on f.movie_id = m.id \
-      where f.user_id = ? \
-      limit ?, ?";
+  if (!order) {
+    order = "dasc";
+  }
 
-  let data = [user_id, offset, limit];
+  let query = `select m.id, m.title, m.release_date, f.id as favorite_id 
+      from movies_favorite as f 
+      join mytable as m 
+      on f.movie_id = m.id 
+      where f.user_id ${user_id} order by f.id ${order}
+      limit ${offset}, ${limit}`;
+
+  let data = [user_id, order, offset, limit];
 
   try {
     [rows] = await connection.query(query, data);

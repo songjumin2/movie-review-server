@@ -37,12 +37,12 @@ exports.getMyReview = async (req, res, next) => {
     order = "dasc";
   }
 
-  let query = `select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating, mr.created_at
+  let query = `select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating
   from movies_reply as mr
   join mytable as m
   on mr.movie_id = m.id
   where mr.user_id = ${user_id} 
-  order by mr.created_at ${order}
+  order by mr.id ${order}
   limit ${offset}, ${limit}`;
 
   let data = [user_id, order, offset, limit];

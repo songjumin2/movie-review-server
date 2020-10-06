@@ -38,12 +38,12 @@ exports.getMyFavorites = async (req, res, next) => {
   let user_id = req.user.id;
 
   let query =
-    "select m.id, m.title, m.release_date, f.id as favorite_id \
+    "select m.id, m.title, m.release_date, m.poster_path, f.id as favorite_id \
       from movies_favorite as f \
       join mytable as m \
       on f.movie_id = m.id \
       where f.user_id = ? \
-      limit ?,?";
+      limit ?,?;";
 
   let data = [user_id, offset, limit];
 

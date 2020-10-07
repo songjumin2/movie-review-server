@@ -7,7 +7,7 @@ const express = require("express");
 
 exports.addFavorite = async (req, res, next) => {
   // 즐겨찾기에 이미 추가된 영화는 즐겨찾기에 추가되지 않도록 한다
-
+  // 중복안되게....
   let movie_id = req.body.movie_id;
   let user_id = req.user.id;
 

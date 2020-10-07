@@ -3,7 +3,7 @@ const express = require("express");
 
 // @desc   좋아하는 영화 추가
 // @route  POST /api/v1/favorites  (post는 body에 담겨있다, parameters는 바디에 담아오는건데 user_id는 해더에 담겨서 일단 movie_id만 가져온다 )
-// @parameters movie_id  (user_id 해킹대비해서 암호화 되어야함 토큰은 해더에 담아서 온다, user_id는 미들웨어가 해줘야함 auth가 함)
+// @request movie_id (user_id 해킹대비해서 암호화 되어야함 토큰은 해더에 담아서 온다, user_id는 미들웨어가 해줘야함 auth가 함)
 
 exports.addFavorite = async (req, res, next) => {
   // 즐겨찾기에 이미 추가된 영화는 즐겨찾기에 추가되지 않도록 한다
@@ -11,7 +11,7 @@ exports.addFavorite = async (req, res, next) => {
   let movie_id = req.body.movie_id;
   let user_id = req.user.id;
 
-  let query = "insert into movies_favorite (movie_id, user_id) values (?, ?)";
+  let query = "insert into movies_favorite (movie_id, user_id) values (?, ?);";
   let data = [movie_id, user_id];
 
   try {

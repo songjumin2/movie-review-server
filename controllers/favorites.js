@@ -16,7 +16,7 @@ exports.addFavorite = async (req, res, next) => {
 
   try {
     [result] = await connection.query(query, data);
-    res.status(200).json({ success: true, message: "즐겨찾기되었습니다." });
+    res.status(200).json({ success: true, message: "즐겨찾기되었습니다!!!" });
   } catch (e) {
     // 1062 에러코드는 중복 되었다 라는 코드
     if (e.errno == 1062) {

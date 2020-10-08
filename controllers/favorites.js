@@ -55,7 +55,7 @@ exports.getMyFavorites = async (req, res, next) => {
   }
 };
 // @desc    즐겨찾기 삭제
-// @route   DELETE  /api/v1/favorites/delete
+// @route   DELETE  /api/v1/favorites/delete?movie_id=581392
 // @request movie_id, user_id(auth)
 
 exports.deleteFavorite = async (req, res, next) => {

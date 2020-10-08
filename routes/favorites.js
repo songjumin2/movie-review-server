@@ -10,5 +10,5 @@ const {
 const router = express.Router();
 
 router.route("/").post(auth, addFavorite).get(auth, getMyFavorites);
-router.route("/delete").post(auth, deleteFavorite);
+router.route("/delete").delete(auth, deleteFavorite);
 module.exports = router;

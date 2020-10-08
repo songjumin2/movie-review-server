@@ -59,8 +59,8 @@ exports.getMyFavorites = async (req, res, next) => {
 // @request movie_id, user_id(auth)
 
 exports.deleteFavorite = async (req, res, next) => {
-  let movie_id = req.body.movie_id;
   let user_id = req.user.id;
+  let movie_id = req.body.movie_id;
 
   if (!movie_id) {
     res.status(400).json();
@@ -72,7 +72,7 @@ exports.deleteFavorite = async (req, res, next) => {
 
   try {
     [result] = await connection.query(query, data);
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, message: "삭제되었습니다." });
   } catch (e) {
     res.status(500).json();
   }

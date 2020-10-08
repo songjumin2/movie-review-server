@@ -296,3 +296,44 @@ exports.deleteUser = async (req, res, next) => {
     conn.release();
   }
 };
+
+// @desc   비번 초기화
+// @route  PUT /api/v1/users/passwd   // post도 body로 받는다
+// @request email, passwdHint
+// @response success, passwd
+
+exports.passwdInit = async (req, res, next) => {
+  let email = req.body.email;
+  let passwdHint = req.body.passwdHint;
+
+  let query = "select passwd_hint from user where email = ?";
+  let data = [email];
+
+  try {
+    [rows] = await connection.query(query, data);
+    if (rows[0].passwd_hint != passwdHint) {
+      res.status(401).json();
+      return;
+    }
+  } catch (e) {
+    res.status(500).json();
+    return;
+  }
+  // 랜덤 문자열 5자리로 생성
+  let newPasswd = Math.random().toString(36).substr(2, 5);
+
+  // 암호화한다
+  const hashedPasswd = await bcrypt.hash(newPasswd, 8);
+
+  query = "update user set passwd = ? where email = ?";
+  data = [hashedPasswd, email];
+
+  try {
+    [result] = await connection.query(query, data);
+    res.status(200).json({ success: true, passwd: newPasswd });
+    return;
+  } catch (e) {
+    res.status(500).json();
+    return;
+  }
+};

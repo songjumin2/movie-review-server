@@ -7,11 +7,11 @@ const express = require("express");
 
 exports.addFavorite = async (req, res, next) => {
   // 즐겨찾기에 이미 추가된 영화는 즐겨찾기에 추가되지 않도록 한다
-  let movie_id = req.body.movie_id;
   let user_id = req.user.id;
+  let movie_id = req.body.movie_id;
 
-  let query = "insert into movies_favorite (movie_id, user_id) values (?, ?);";
-  let data = [movie_id, user_id];
+  let query = "insert into movies_favorite (user_id, movie_id) values (?, ?);";
+  let data = [user_id, movie_id];
 
   try {
     [result] = await connection.query(query, data);

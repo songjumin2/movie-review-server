@@ -15,7 +15,7 @@ router
   .post(auth, addReply)
   .get(getReply)
   .put(auth, updateReply)
-  .post(auth, deleteReply);
+  .delete(auth, deleteReply);
 router.route("/review").get(auth, getMyReview);
 
 module.exports = router;

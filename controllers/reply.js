@@ -127,7 +127,7 @@ exports.updateReply = async (req, res, next) => {
   }
 };
 // @desc   자신이 적은 댓글 삭제하기
-// @route  DELETE /api/v1/reply
+// @route  DELETE /api/v1/reply/delete
 // @request reply_id, user_id
 
 exports.deleteReply = async (req, res, next) => {

@@ -7,6 +7,7 @@ const connection = require("../db/mysql_connection");
 exports.getMovies = async (req, res, next) => {
   console.log("영화 전부 가져오는 API");
 
+  let user_id  = req.user.id;
   let offset = req.query.offset;
   let limit = req.query.limit;
   // 쿼리빠졌다 알려주는 코드
@@ -15,10 +16,12 @@ exports.getMovies = async (req, res, next) => {
     return;
   }
   // ${offset}, ${limit} 대신 물음표로 해도됨
-  let query = `select m.*, count(r.movie_id) as reply_cnt, round(avg(r.rating), 1) as avg_rating  
+  let query = `select ifnull(f.user_id, 0), m.*, count(r.movie_id) as reply_cnt, round(avg(r.rating), 1) as avg_rating  
     from mytable as m
     left join movies_reply as r
     on m.id = r.movie_id
+    left join movies_favorite as f
+    on m.id = f.movie_id and f.user_id = ${user_id}
     group by m.id
     order by m.id 
     limit ${offset}, ${limit};`;

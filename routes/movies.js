@@ -5,7 +5,7 @@ const { getMovies, getAuthMovies } = require("../controllers/movies");
 
 const router = express.Router();
 
-router.route("/").get(auth, getMovies);
+router.route("/").get(getMovies);
 router.route("/auth").get(auth, getAuthMovies);
 
 module.exports = router;

@@ -16,7 +16,7 @@ exports.getMovies = async (req, res, next) => {
     return;
   }
   // ${offset}, ${limit} 대신 물음표로 해도됨
-  let query = `select ifnull(f.user_id, 0), m.*, count(r.movie_id) as reply_cnt, round(avg(r.rating), 1) as avg_rating  
+  let query = `select if(f.user_id is null, 0, 1), m.*, count(r.movie_id) as reply_cnt, round(avg(r.rating), 1) as avg_rating  
     from mytable as m
     left join movies_reply as r
     on m.id = r.movie_id

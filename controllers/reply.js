@@ -37,7 +37,7 @@ exports.getMyReview = async (req, res, next) => {
     order = "dasc";
   }
 
-  let query = `select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating
+  let query = `select m.id, m.title, m.release_date, mr.id as reply_id, mr.content, mr.rating
   from movies_reply as mr
   join mytable as m
   on mr.movie_id = m.id
@@ -70,7 +70,7 @@ exports.getMyReview2 = async (req, res, next) => {
     order = "dasc";
   }
 
-  let query = `select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating
+  let query = `select m.id, m.title, m.release_date, mr.id as reply_id, mr.content, mr.rating
   from movies_reply as mr
   join mytable as m
   on mr.movie_id = m.id

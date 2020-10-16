@@ -141,7 +141,7 @@ exports.deleteReply = async (req, res, next) => {
   try {
     [rows] = await connection.query(query, data);
     if (rows[0].user_id != user_id) {
-      res.status(401).json({ success: false, "유저아이디가 맞지않습니다." });
+      res.status(401).json({ success: false, messege: "유저아이디가 맞지않습니다." });
       return;
     }
   } catch (e) {

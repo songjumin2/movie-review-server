@@ -134,6 +134,11 @@ exports.deleteReply = async (req, res, next) => {
   let reply_id = req.body.reply_id;
   let user_id = req.user.id;
 
+  if (!reply_id) {
+    res.status(400).json();
+    return;
+  }
+
   // 해당 유저의 댓글이 맞는지 체크
   let query = "select * from movies_reply where id = ?";
   let data = [reply_id];

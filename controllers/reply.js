@@ -55,6 +55,39 @@ exports.getMyReview = async (req, res, next) => {
   }
 };
 
+// 내가 쓴 리뷰 가져오기
+// @desc 나의 리뷰 가져오기
+// @route GET /api/v1/reply/review2?offset=0&limit=25&order=desc
+// @parameters  offset, limit
+// @response success, cnt, items : [{title, content, rating}]
+exports.getMyReview2 = async (req, res, next) => {
+  let offset = Number(req.query.offset);
+  let limit = Number(req.query.limit);
+  let order = req.query.order;
+  let user_id = req.user.id;
+
+  if (!order) {
+    order = "dasc";
+  }
+
+  let query = `select m.id, m.title, m.release_date, mr.id as review_id, mr.content, mr.rating
+  from movies_reply as mr
+  join mytable as m
+  on mr.movie_id = m.id
+  where mr.user_id = ${user_id} 
+  order by mr.id ${order}
+  limit ${offset}, ${limit}`;
+
+  let data = [user_id, order, offset, limit];
+  try {
+    [rows] = await connection.query(query, data);
+    let cnt = rows.length;
+    res.status(200).json({ success: true, items: rows, cnt: cnt });
+  } catch (e) {
+    res.status(400).json({ error: e });
+  }
+};
+
 // @desc     해당 영화의 댓글을 가져오는 API
 // @route    GET  /api/v1/reply?movie_id=124&offset=0&limit=25&order=desc
 // @request  movie_id, offset, limit

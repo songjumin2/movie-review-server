@@ -6,6 +6,7 @@ const {
   updateReply,
   deleteReply,
   getMyReview,
+  getMyReview2,
 } = require("../controllers/reply");
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router
   .put(auth, updateReply)
 router.route("/delete").post(auth, deleteReply);
 router.route("/review").get(auth, getMyReview);
+router.route("/review2").get(auth, getMyReview2);
 
 module.exports = router;

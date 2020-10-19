@@ -134,6 +134,11 @@ exports.deleteReply = async (req, res, next) => {
   let reply_id = req.body.reply_id;
   let user_id = req.user.id;
 
+  if (!reply_id) {
+    res.status(400).json();
+    return;
+  }
+
   // 해당 유저의 댓글이 맞는지 체크
   let query = "select * from movies_reply where id = ?";
   let data = [reply_id];
@@ -141,7 +146,7 @@ exports.deleteReply = async (req, res, next) => {
   try {
     [rows] = await connection.query(query, data);
     if (rows[0].user_id != user_id) {
-      res.status(401).json({ success: false, messege: "유저아이디가 맞지않습니다." });
+      res.status(401).json({ success: false, messege:"본인 댓글만 수정 가능합니다." });
       return;
     }
   } catch (e) {

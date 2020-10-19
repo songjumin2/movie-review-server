@@ -49,6 +49,10 @@ exports.getMyReview = async (req, res, next) => {
   try {
     [rows] = await connection.query(query, data);
     let cnt = rows.length;
+    if (rows[0].user_id != user_id) {
+      res.status(401).json({ success: false });
+      return;
+    }
     res.status(200).json({ success: true, items: rows, cnt: cnt });
   } catch (e) {
     res.status(400).json({ error: e });
@@ -93,45 +97,6 @@ exports.getReply = async (req, res, next) => {
 // @route   PUT /api/v1/reply
 // @request reply_id, content, rating
 exports.updateReply = async (req, res, next) => {
-  // 이 사람이 쓴 댓글이 맞는지 체크 => 맞으면 댓글 수정
-
-  let reply_id = req.body.reply_id;
-  let user_id = req.user.id;
-  let content = req.body.content;
-  let rating = req.body.rating;
-
-  let query = "select * from movies_reply where id =? ";
-  let data = [reply_id];
-
-  try {
-    [rows] = await connection.query(query, data);
-    // 댓글 쓴 사람이 아니면, 401로 보낸다 (너는 이 댓글 수정할 수 없다)
-    if (rows[0].user_id != user_id) {
-      res.status(401).json({ success: false });
-      return;
-    }
-  } catch (e) {
-    res.status(400).json({ success: false });
-    return;
-  }
-
-  query = "update movies_reply set content = ?, rating = ? where id = ? ";
-  data = [content, rating, reply_id];
-
-  try {
-    [result] = await connection.query(query, data);
-    res.status(200).json({ success: true });
-    return;
-  } catch (e) {
-    res.status(400).json({ success: false });
-    return;
-  }
-};
-
-// @desc    내가 쓴 댓글만 수정하기
-// @route   PUT /api/v1/reply/myReview
-// @request reply_id, content, rating
-exports.myUpdateReply = async (req, res, next) => {
   // 이 사람이 쓴 댓글이 맞는지 체크 => 맞으면 댓글 수정
 
   let reply_id = req.body.reply_id;

@@ -49,10 +49,6 @@ exports.getMyReview = async (req, res, next) => {
   try {
     [rows] = await connection.query(query, data);
     let cnt = rows.length;
-    if (rows[0].user_id != user_id) {
-      res.status(401).json({ success: false });
-      return;
-    }
     res.status(200).json({ success: true, items: rows, cnt: cnt });
   } catch (e) {
     res.status(400).json({ error: e });
